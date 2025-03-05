@@ -1,4 +1,9 @@
 import 'package:flutter/material.dart';
+import '../widgets/country_dropdown.dart';
+import '../widgets/birth_date_picker.dart';
+import '../widgets/gender_selector.dart';
+import '../widgets/result_card.dart';
+import '../widgets/calculate_button.dart';
 
 class CalculatorPage extends StatefulWidget {
   const CalculatorPage({super.key});
@@ -90,8 +95,7 @@ class _CalculatorPageState extends State<CalculatorPage>
       if (_birthDate != null && _selectedCountry != null) {
         // Calculate age
         final today = DateTime.now();
-        final age =
-            today.year -
+        final age = today.year -
             _birthDate!.year -
             (today.month < _birthDate!.month ||
                     (today.month == _birthDate!.month &&
@@ -126,6 +130,11 @@ class _CalculatorPageState extends State<CalculatorPage>
 
   @override
   Widget build(BuildContext context) {
+    // Get the screen width
+    final screenWidth = MediaQuery.of(context).size.width;
+    // Calculate content width (use 90% on small screens, fixed width on larger screens)
+    final contentWidth = screenWidth < 600 ? screenWidth * 0.9 : 500.0;
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -137,26 +146,44 @@ class _CalculatorPageState extends State<CalculatorPage>
             fontSize: 20,
             fontWeight: FontWeight.w500,
             letterSpacing: 1,
+            color: Colors.white,
           ),
         ),
       ),
       body: SafeArea(
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.all(24.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const SizedBox(height: 10),
-                const Text(
-                  'Find out how much time you have left based on life expectancy data.',
-                  style: TextStyle(fontSize: 16, color: Colors.black54),
+        child: Center(
+          child: ScrollConfiguration(
+            behavior:
+                ScrollConfiguration.of(context).copyWith(scrollbars: false),
+            child: SingleChildScrollView(
+              child: Container(
+                constraints: BoxConstraints(maxWidth: contentWidth),
+                padding: const EdgeInsets.symmetric(
+                    vertical: 24.0, horizontal: 16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const SizedBox(height: 10),
+                    const Text(
+                      'Find out how much time you have left based on life expectancy data.',
+                      style: TextStyle(fontSize: 16, color: Colors.black54),
+                    ),
+                    const SizedBox(height: 40),
+                    _buildForm(),
+                    const SizedBox(height: 40),
+                    if (_showResult)
+                      ResultCard(
+                        fadeAnimation: _fadeInAnimation,
+                        slideAnimation: _slideAnimation,
+                        yearsLeft: _yearsLeft,
+                        daysLeft: _daysLeft,
+                        expectedEndDate: _expectedEndDate,
+                        birthDate: _birthDate!,
+                        lifeExpectancy: _yearsLeft + _calculateCurrentAge(),
+                      ),
+                  ],
                 ),
-                const SizedBox(height: 40),
-                _buildForm(),
-                const SizedBox(height: 40),
-                if (_showResult) _buildResultCard(),
-              ],
+              ),
             ),
           ),
         ),
@@ -170,304 +197,74 @@ class _CalculatorPageState extends State<CalculatorPage>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          _buildCountryDropdown(),
+          CountryDropdown(
+            countries: _countries,
+            selectedCountry: _selectedCountry,
+            onCountryChanged: (value) {
+              setState(() {
+                _selectedCountry = value;
+              });
+            },
+          ),
           const SizedBox(height: 24),
-          _buildBirthDatePicker(),
+          BirthDatePicker(
+            selectedDate: _birthDate,
+            onDateSelected: (date) {
+              setState(() {
+                _birthDate = date;
+              });
+            },
+          ),
           const SizedBox(height: 24),
-          _buildGenderSelector(),
+          GenderSelector(
+            selectedGender: _selectedGender,
+            onGenderChanged: (value) {
+              setState(() {
+                _selectedGender = value;
+              });
+            },
+          ),
           const SizedBox(height: 36),
-          _buildCalculateButton(),
+          CalculateButton(onPressed: _calculateLifeExpectancy),
         ],
       ),
     );
   }
 
-  Widget _buildCountryDropdown() {
-    return DropdownButtonFormField<String>(
-      decoration: InputDecoration(
-        labelText: 'Country',
-        labelStyle: const TextStyle(color: Colors.teal),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-          borderSide: BorderSide(color: Colors.grey.shade300),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-          borderSide: BorderSide(color: Colors.grey.shade300),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-          borderSide: const BorderSide(color: Colors.teal),
-        ),
-        filled: true,
-        fillColor: Colors.grey.shade50,
-      ),
-      style: const TextStyle(color: Colors.black87),
-      value: _selectedCountry,
-      items:
-          _countries.map((country) {
-            return DropdownMenuItem<String>(
-              value: country,
-              child: Text(country),
-            );
-          }).toList(),
-      onChanged: (value) {
-        setState(() {
-          _selectedCountry = value;
-        });
-      },
-      validator: (value) {
-        if (value == null || value.isEmpty) {
-          return 'Please select a country';
-        }
-        return null;
-      },
-    );
-  }
+  // Helper method to calculate current age
+  double _calculateCurrentAge() {
+    if (_birthDate == null) return 0;
 
-  Widget _buildBirthDatePicker() {
-    return GestureDetector(
-      onTap: () async {
-        final date = await showDatePicker(
-          context: context,
-          initialDate: _birthDate ?? DateTime(2000),
-          firstDate: DateTime(1920),
-          lastDate: DateTime.now(),
-          builder: (context, child) {
-            return Theme(
-              data: Theme.of(context).copyWith(
-                colorScheme: ColorScheme.light(
-                  primary: Colors.teal,
-                  onPrimary: Colors.white,
-                  surface: Colors.white,
-                  onSurface: Colors.black87,
-                ),
-              ),
-              child: child!,
-            );
-          },
-        );
-        if (date != null) {
-          setState(() {
-            _birthDate = date;
-          });
-        }
-      },
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 12),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: Colors.grey.shade300),
-          color: Colors.grey.shade50,
-        ),
-        child: Row(
-          children: [
-            const Icon(Icons.calendar_today, color: Colors.teal, size: 20),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Text(
-                _birthDate == null
-                    ? 'Select birth date'
-                    : '${_birthDate!.day}/${_birthDate!.month}/${_birthDate!.year}',
-                style: TextStyle(
-                  color:
-                      _birthDate == null
-                          ? Colors.grey.shade600
-                          : Colors.black87,
-                  fontSize: 16,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+    final today = DateTime.now();
+    final age = today.year -
+        _birthDate!.year -
+        (today.month < _birthDate!.month ||
+                (today.month == _birthDate!.month &&
+                    today.day < _birthDate!.day)
+            ? 1
+            : 0);
 
-  Widget _buildGenderSelector() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          'Gender',
-          style: TextStyle(color: Colors.teal, fontSize: 14),
-        ),
-        const SizedBox(height: 12),
-        Row(
-          children: [
-            Expanded(
-              child: _buildGenderOption('female', 'Female', Icons.female),
-            ),
-            const SizedBox(width: 16),
-            Expanded(child: _buildGenderOption('male', 'Male', Icons.male)),
-          ],
-        ),
-      ],
+    // Add fractional part of the year
+    final birthDayThisYear = DateTime(
+      today.year,
+      _birthDate!.month,
+      _birthDate!.day,
     );
-  }
+    final daysInYear = DateTime(today.year + 1, 1, 1)
+        .difference(DateTime(today.year, 1, 1))
+        .inDays;
 
-  Widget _buildGenderOption(String value, String label, IconData icon) {
-    final isSelected = _selectedGender == value;
+    double fractionalAge = age.toDouble();
+    if (birthDayThisYear.isBefore(today)) {
+      // Birthday already passed this year
+      final daysSinceBirthday = today.difference(birthDayThisYear).inDays;
+      fractionalAge += daysSinceBirthday / daysInYear;
+    } else {
+      // Birthday hasn't passed yet
+      final daysUntilBirthday = birthDayThisYear.difference(today).inDays;
+      fractionalAge += (daysInYear - daysUntilBirthday) / daysInYear;
+    }
 
-    return GestureDetector(
-      onTap: () {
-        setState(() {
-          _selectedGender = value;
-        });
-      },
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 16),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(8),
-          color: isSelected ? Colors.teal.shade50 : Colors.grey.shade50,
-          border: Border.all(
-            color: isSelected ? Colors.teal : Colors.grey.shade300,
-            width: 1,
-          ),
-        ),
-        child: Column(
-          children: [
-            Icon(
-              icon,
-              color: isSelected ? Colors.teal : Colors.grey.shade600,
-              size: 24,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              label,
-              style: TextStyle(
-                color: isSelected ? Colors.teal : Colors.grey.shade700,
-                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildCalculateButton() {
-    return ElevatedButton(
-      onPressed: _calculateLifeExpectancy,
-      style: ElevatedButton.styleFrom(
-        backgroundColor: Colors.teal,
-        foregroundColor: Colors.white,
-        padding: const EdgeInsets.symmetric(vertical: 16),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-        elevation: 0,
-      ),
-      child: const Text(
-        'CALCULATE',
-        style: TextStyle(
-          fontSize: 16,
-          fontWeight: FontWeight.w500,
-          letterSpacing: 1,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildResultCard() {
-    return AnimatedBuilder(
-      animation: _animationController,
-      builder: (context, child) {
-        return Opacity(
-          opacity: _fadeInAnimation.value,
-          child: Transform.translate(
-            offset: Offset(0, _slideAnimation.value),
-            child: Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(
-                color: Colors.grey.shade50,
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.grey.shade200),
-              ),
-              child: Column(
-                children: [
-                  const Text(
-                    'YOUR REMAINING TIME',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
-                      color: Colors.teal,
-                      letterSpacing: 1,
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  _buildCounterAnimation(_yearsLeft, 'YEARS'),
-                  const SizedBox(height: 16),
-                  _buildCounterAnimation(_daysLeft, 'DAYS', decimals: 0),
-                  const SizedBox(height: 24),
-                  _buildProgressIndicator(),
-                  const SizedBox(height: 24),
-                  if (_expectedEndDate != null)
-                    Text(
-                      'Expected end date: ${_expectedEndDate!.day}/${_expectedEndDate!.month}/${_expectedEndDate!.year}',
-                      style: const TextStyle(
-                        color: Colors.black54,
-                        fontStyle: FontStyle.italic,
-                      ),
-                    ),
-                ],
-              ),
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildCounterAnimation(double value, String unit, {int decimals = 1}) {
-    return TweenAnimationBuilder<double>(
-      tween: Tween<double>(begin: 0, end: value),
-      duration: const Duration(milliseconds: 1200),
-      curve: Curves.easeOutCubic,
-      builder: (context, animatedValue, child) {
-        return Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            Text(
-              animatedValue.toStringAsFixed(decimals),
-              style: const TextStyle(
-                fontSize: 48,
-                fontWeight: FontWeight.bold,
-                color: Colors.teal,
-              ),
-            ),
-            const SizedBox(width: 8),
-            Padding(
-              padding: const EdgeInsets.only(bottom: 8),
-              child: Text(
-                unit,
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                  color: Colors.teal.shade700,
-                ),
-              ),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  Widget _buildProgressIndicator() {
-    return TweenAnimationBuilder<double>(
-      tween: Tween<double>(begin: 0, end: 1),
-      duration: const Duration(milliseconds: 1200),
-      curve: Curves.easeOutQuad,
-      builder: (context, animatedValue, child) {
-        return LinearProgressIndicator(
-          value: animatedValue,
-          backgroundColor: Colors.grey.shade200,
-          valueColor: AlwaysStoppedAnimation<Color>(Colors.teal),
-          minHeight: 8,
-          borderRadius: BorderRadius.circular(4),
-        );
-      },
-    );
+    return fractionalAge;
   }
 }
