@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'core/theme/bloc/theme_bloc.dart';
 import 'core/theme/bloc/theme_state.dart';
 import 'features/calculator/presentation/pages/calculator_page.dart';
@@ -8,6 +9,9 @@ import 'features/calculator/presentation/pages/calculator_page.dart';
 void main() async {
   // Ensure Flutter is initialized
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Load environment variables from .env file
+  await dotenv.load(fileName: ".env");
 
   // Initialize SharedPreferences ahead of time
   await SharedPreferences.getInstance();
