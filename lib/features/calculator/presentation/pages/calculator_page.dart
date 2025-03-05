@@ -1,4 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../../core/theme/bloc/theme_bloc.dart';
+import '../../../../core/theme/bloc/theme_state.dart';
+import '../../../../core/constants/colors.dart';
+import '../../../../core/constants/constants.dart'; // Import AppConstants
 import '../widgets/country_dropdown.dart';
 import '../widgets/birth_date_picker.dart';
 import '../widgets/gender_selector.dart';
@@ -135,59 +140,97 @@ class _CalculatorPageState extends State<CalculatorPage>
     // Calculate content width (use 90% on small screens, fixed width on larger screens)
     final contentWidth = screenWidth < 600 ? screenWidth * 0.9 : 500.0;
 
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.teal,
-        elevation: 0,
-        title: const Text(
-          'LIFE CALCULATOR',
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.w500,
-            letterSpacing: 1,
-            color: Colors.white,
-          ),
-        ),
-      ),
-      body: SafeArea(
-        child: Center(
-          child: ScrollConfiguration(
-            behavior:
-                ScrollConfiguration.of(context).copyWith(scrollbars: false),
-            child: SingleChildScrollView(
-              child: Container(
-                constraints: BoxConstraints(maxWidth: contentWidth),
-                padding: const EdgeInsets.symmetric(
-                    vertical: 24.0, horizontal: 16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const SizedBox(height: 10),
-                    const Text(
-                      'Find out how much time you have left based on life expectancy data.',
-                      style: TextStyle(fontSize: 16, color: Colors.black54),
+    return BlocBuilder<ThemeBloc, ThemeState>(
+      builder: (context, themeState) {
+        // Instead of comparing object reference, check the brightness directly
+        final isDarkMode = themeState.themeData.brightness == Brightness.dark;
+        return Scaffold(
+          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+          appBar: AppBar(
+            backgroundColor: AppConstants.tealColor, // Use teal color directly
+            elevation: 0,
+            title: const Text(
+              'LIFE CALCULATOR',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.w500,
+                letterSpacing: 1,
+                color: Colors.white,
+              ),
+            ),
+            actions: [
+              BlocBuilder<ThemeBloc, ThemeState>(
+                builder: (context, state) {
+                  // Use the isDarkMode property directly
+                  final isDarkMode = state.isDarkMode;
+                  return IconButton(
+                    icon: Icon(
+                      isDarkMode ? Icons.light_mode : Icons.dark_mode,
+                      color: Colors.white,
                     ),
-                    const SizedBox(height: 40),
-                    _buildForm(),
-                    const SizedBox(height: 40),
-                    if (_showResult)
-                      ResultCard(
-                        fadeAnimation: _fadeInAnimation,
-                        slideAnimation: _slideAnimation,
-                        yearsLeft: _yearsLeft,
-                        daysLeft: _daysLeft,
-                        expectedEndDate: _expectedEndDate,
-                        birthDate: _birthDate!,
-                        lifeExpectancy: _yearsLeft + _calculateCurrentAge(),
-                      ),
-                  ],
+                    onPressed: () {
+                      print(
+                          'Toggle button pressed: current mode is ${isDarkMode ? "dark" : "light"}');
+                      if (isDarkMode) {
+                        context.read<ThemeBloc>().add(ThemeEvent.toggleLight);
+                      } else {
+                        context.read<ThemeBloc>().add(ThemeEvent.toggleDark);
+                      }
+                    },
+                    tooltip: isDarkMode
+                        ? 'Switch to Light Mode'
+                        : 'Switch to Dark Mode',
+                  );
+                },
+              ),
+            ],
+          ),
+          body: SafeArea(
+            child: Center(
+              child: ScrollConfiguration(
+                behavior:
+                    ScrollConfiguration.of(context).copyWith(scrollbars: false),
+                child: SingleChildScrollView(
+                  child: Container(
+                    constraints: BoxConstraints(maxWidth: contentWidth),
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 24.0, horizontal: 16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const SizedBox(height: 10),
+                        Text(
+                          'Find out how much time you have left based on life expectancy data.',
+                          style: TextStyle(
+                            fontSize: 16,
+                            color:
+                                Theme.of(context).brightness == Brightness.dark
+                                    ? Colors.white70
+                                    : Colors.black54,
+                          ),
+                        ),
+                        const SizedBox(height: 40),
+                        _buildForm(),
+                        const SizedBox(height: 40),
+                        if (_showResult)
+                          ResultCard(
+                            fadeAnimation: _fadeInAnimation,
+                            slideAnimation: _slideAnimation,
+                            yearsLeft: _yearsLeft,
+                            daysLeft: _daysLeft,
+                            expectedEndDate: _expectedEndDate,
+                            birthDate: _birthDate!,
+                            lifeExpectancy: _yearsLeft + _calculateCurrentAge(),
+                          ),
+                      ],
+                    ),
+                  ),
                 ),
               ),
             ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 

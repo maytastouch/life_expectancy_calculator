@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../../../../core/constants/colors.dart';
+import '../../../../core/constants/constants.dart'; // Import AppConstants
 
 class CalculateButton extends StatelessWidget {
   final VoidCallback onPressed;
@@ -13,7 +15,7 @@ class CalculateButton extends StatelessWidget {
     return ElevatedButton(
       onPressed: onPressed,
       style: ElevatedButton.styleFrom(
-        backgroundColor: Colors.teal,
+        backgroundColor: AppConstants.tealColor, // Use teal color directly
         foregroundColor: Colors.white,
         padding: const EdgeInsets.symmetric(vertical: 16),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
@@ -23,7 +25,7 @@ class CalculateButton extends StatelessWidget {
         'CALCULATE',
         style: TextStyle(
           fontSize: 16,
-          fontWeight: FontWeight.w500,
+          fontWeight: FontWeight.bold,
           letterSpacing: 1,
         ),
       ),

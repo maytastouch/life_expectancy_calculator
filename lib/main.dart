@@ -1,24 +1,39 @@
 import 'package:flutter/material.dart';
-
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'core/theme/bloc/theme_bloc.dart';
+import 'core/theme/bloc/theme_state.dart';
 import 'features/calculator/presentation/pages/calculator_page.dart';
 
-void main() {
+void main() async {
+  // Ensure Flutter is initialized
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialize SharedPreferences ahead of time
+  await SharedPreferences.getInstance();
+
   runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'Life Expectancy Calculator',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+    return BlocProvider(
+      create: (context) => ThemeBloc(),
+      child: BlocBuilder<ThemeBloc, ThemeState>(
+        builder: (context, themeState) {
+          final isDark = themeState.themeData.brightness == Brightness.dark;
+          print('Theme state updated: ${isDark ? "dark" : "light"}');
+          return MaterialApp(
+            debugShowCheckedModeBanner: false,
+            title: 'Life Expectancy Calculator',
+            theme: themeState.themeData,
+            home: const CalculatorPage(),
+          );
+        },
       ),
-      home: const CalculatorPage(),
     );
   }
 }

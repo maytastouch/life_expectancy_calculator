@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../../../../core/constants/colors.dart';
+import '../../../../core/constants/constants.dart'; // Import AppConstants
 
 class AnimatedProgressBar extends StatelessWidget {
   final DateTime birthDate;
@@ -17,6 +19,7 @@ class AnimatedProgressBar extends StatelessWidget {
     final daysLived = today.difference(birthDate).inDays;
     final totalDays = (lifeExpectancy * 365.25).round();
     final progress = daysLived / totalDays;
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     // Clamp progress between 0 and 1
     final clampedProgress = progress.clamp(0.0, 1.0);
@@ -33,7 +36,7 @@ class AnimatedProgressBar extends StatelessWidget {
                 'Life Progress: ${(clampedProgress * 100).toStringAsFixed(1)}%',
                 style: const TextStyle(
                   fontSize: 14,
-                  color: Colors.teal,
+                  color: AppConstants.tealColor, // Use teal color directly
                   fontWeight: FontWeight.w500,
                 ),
               ),
@@ -41,7 +44,8 @@ class AnimatedProgressBar extends StatelessWidget {
                 '${daysLived.toStringAsFixed(0)} / ${totalDays.toStringAsFixed(0)} days',
                 style: TextStyle(
                   fontSize: 12,
-                  color: Colors.grey.shade600,
+                  color:
+                      isDarkMode ? Colors.grey.shade400 : Colors.grey.shade600,
                 ),
               ),
             ],
@@ -54,8 +58,10 @@ class AnimatedProgressBar extends StatelessWidget {
           builder: (context, animatedValue, child) {
             return LinearProgressIndicator(
               value: animatedValue,
-              backgroundColor: Colors.grey.shade200,
-              valueColor: const AlwaysStoppedAnimation<Color>(Colors.teal),
+              backgroundColor:
+                  isDarkMode ? Colors.grey.shade800 : Colors.grey.shade200,
+              valueColor: const AlwaysStoppedAnimation<Color>(
+                  AppConstants.tealColor), // Use teal color directly
               minHeight: 8,
               borderRadius: BorderRadius.circular(4),
             );

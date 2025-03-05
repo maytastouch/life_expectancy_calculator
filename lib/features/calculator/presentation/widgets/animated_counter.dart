@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../../../../core/constants/colors.dart';
+import '../../../../core/constants/constants.dart';
 
 class AnimatedCounter extends StatelessWidget {
   final double value;
@@ -14,6 +16,8 @@ class AnimatedCounter extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
     return TweenAnimationBuilder<double>(
       tween: Tween<double>(begin: 0, end: value),
       duration: const Duration(milliseconds: 1200),
@@ -28,7 +32,7 @@ class AnimatedCounter extends StatelessWidget {
               style: const TextStyle(
                 fontSize: 48,
                 fontWeight: FontWeight.bold,
-                color: Colors.teal,
+                color: AppConstants.tealColor,
               ),
             ),
             const SizedBox(width: 8),
@@ -39,7 +43,9 @@ class AnimatedCounter extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
-                  color: Colors.teal.shade700,
+                  color: isDarkMode
+                      ? AppConstants.tealColor.withOpacity(0.8)
+                      : AppConstants.tealColor.withOpacity(0.8),
                 ),
               ),
             ),

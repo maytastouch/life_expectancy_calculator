@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../../../../core/constants/colors.dart';
+import '../../../../core/constants/constants.dart';
 
 class BirthDatePicker extends StatelessWidget {
   final DateTime? selectedDate;
@@ -12,6 +14,8 @@ class BirthDatePicker extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
     return GestureDetector(
       onTap: () async {
         final date = await showDatePicker(
@@ -22,11 +26,11 @@ class BirthDatePicker extends StatelessWidget {
           builder: (context, child) {
             return Theme(
               data: Theme.of(context).copyWith(
-                colorScheme: const ColorScheme.light(
-                  primary: Colors.teal,
+                colorScheme: ColorScheme.light(
+                  primary: AppConstants.tealColor,
                   onPrimary: Colors.white,
-                  surface: Colors.white,
-                  onSurface: Colors.black87,
+                  surface: isDarkMode ? Colors.grey.shade800 : Colors.white,
+                  onSurface: isDarkMode ? Colors.white : Colors.black87,
                 ),
               ),
               child: child!,
@@ -41,12 +45,15 @@ class BirthDatePicker extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 12),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: Colors.grey.shade300),
-          color: Colors.grey.shade50,
+          border: Border.all(
+            color: isDarkMode ? Colors.grey.shade700 : Colors.grey.shade300,
+          ),
+          color: isDarkMode ? Colors.grey.shade900 : Colors.grey.shade50,
         ),
         child: Row(
           children: [
-            const Icon(Icons.calendar_today, color: Colors.teal, size: 20),
+            const Icon(Icons.calendar_today,
+                color: AppConstants.tealColor, size: 20),
             const SizedBox(width: 12),
             Expanded(
               child: Text(
@@ -55,8 +62,10 @@ class BirthDatePicker extends StatelessWidget {
                     : '${selectedDate!.day}/${selectedDate!.month}/${selectedDate!.year}',
                 style: TextStyle(
                   color: selectedDate == null
-                      ? Colors.grey.shade600
-                      : Colors.black87,
+                      ? (isDarkMode
+                          ? Colors.grey.shade400
+                          : Colors.grey.shade600)
+                      : (isDarkMode ? Colors.white : Colors.black87),
                   fontSize: 16,
                 ),
               ),

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../../../../core/constants/colors.dart';
+import '../../../../core/constants/constants.dart';
 import 'animated_counter.dart';
 import 'progress_bar.dart';
 
@@ -24,6 +26,9 @@ class ResultCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Instead of using Theme.of(context).brightness, get it directly from BlocBuilder
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
     return AnimatedBuilder(
       animation: fadeAnimation,
       builder: (context, child) {
@@ -35,9 +40,12 @@ class ResultCard extends StatelessWidget {
               width: double.infinity,
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
-                color: Colors.grey.shade50,
+                color: isDarkMode ? Colors.black12 : Colors.grey.shade50,
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.grey.shade200),
+                border: Border.all(
+                  color:
+                      isDarkMode ? Colors.grey.shade800 : Colors.grey.shade200,
+                ),
               ),
               child: Column(
                 children: [
@@ -46,7 +54,7 @@ class ResultCard extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w500,
-                      color: Colors.teal,
+                      color: AppConstants.tealColor,
                       letterSpacing: 1,
                     ),
                   ),
@@ -63,8 +71,8 @@ class ResultCard extends StatelessWidget {
                   if (expectedEndDate != null)
                     Text(
                       'Expected end date: ${expectedEndDate!.day}/${expectedEndDate!.month}/${expectedEndDate!.year}',
-                      style: const TextStyle(
-                        color: Colors.black54,
+                      style: TextStyle(
+                        color: isDarkMode ? Colors.white70 : Colors.black54,
                         fontStyle: FontStyle.italic,
                       ),
                     ),

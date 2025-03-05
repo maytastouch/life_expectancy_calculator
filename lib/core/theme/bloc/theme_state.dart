@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 
 import '../../constants/colors.dart';
+import '../../constants/constants.dart'; // Import AppConstants
 
 class ThemeState {
   final ThemeData themeData;
+  final bool isDarkMode;
 
-  ThemeState(this.themeData);
+  ThemeState(this.themeData, this.isDarkMode);
 
   static _border([Color color = AppColors.greyColor]) => OutlineInputBorder(
         borderSide: BorderSide(
@@ -21,7 +23,7 @@ class ThemeState {
           // Customize dark theme properties
 
           brightness: Brightness.light,
-          primaryColor: AppColors.primaryColor, // Using your main color
+          primaryColor: AppConstants.tealColor, // Use teal color from constants
 // BottomAppBar
           cardColor: AppColors.whiteModeColor, // Cards
           dividerColor: Colors.black12, // Dialogs
@@ -45,7 +47,7 @@ class ThemeState {
           //application background color
           scaffoldBackgroundColor: AppColors.whiteModeColor,
           appBarTheme: const AppBarTheme(
-            backgroundColor: AppColors.primaryColor,
+            backgroundColor: AppConstants.tealColor, // Use teal color
             elevation: 0,
           ),
           inputDecorationTheme: InputDecorationTheme(
@@ -57,12 +59,13 @@ class ThemeState {
             ),
             border: _border(),
             enabledBorder: _border(),
-            focusedBorder: _border(AppColors.primaryColor),
+            focusedBorder: _border(AppConstants.tealColor), // Use teal color
             errorBorder: _border(AppColors.errorColor),
           ),
           dialogTheme:
-              DialogThemeData(backgroundColor: AppColors.whiteModeColor),
+              const DialogThemeData(backgroundColor: AppColors.whiteModeColor),
         ),
+        false, // isDarkMode
       );
 
 //dark theme
@@ -70,12 +73,12 @@ class ThemeState {
         ThemeData.dark().copyWith(
           // Customize light theme properties
           brightness: Brightness.dark,
-          primaryColor: Colors.black,
+          primaryColor: AppConstants.tealColor, // Use teal color from constants
           scaffoldBackgroundColor: Colors.black, // Scaffold background
           appBarTheme: const AppBarTheme(
-            color: Colors.black, // AppBar background
             iconTheme: IconThemeData(color: Colors.white), // AppBar icons
-          ), // BottomAppBar
+            backgroundColor: AppConstants.tealColor, // Use teal color
+          ),
           cardColor: Colors.black, // Cards
           dividerColor: Colors.white24, // Dialogs
           floatingActionButtonTheme: const FloatingActionButtonThemeData(
@@ -93,7 +96,17 @@ class ThemeState {
           ),
 
           bottomAppBarTheme: const BottomAppBarTheme(color: Colors.black),
-          dialogTheme: DialogThemeData(backgroundColor: Colors.black),
+          dialogTheme: const DialogThemeData(backgroundColor: Colors.black),
         ),
+        true, // isDarkMode
       );
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    return other is ThemeState && other.isDarkMode == isDarkMode;
+  }
+
+  @override
+  int get hashCode => isDarkMode.hashCode;
 }

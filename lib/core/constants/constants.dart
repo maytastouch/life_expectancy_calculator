@@ -23,6 +23,8 @@ class AppConstants {
     AppColors.lighterGreenColor,
   ];
 
+  // teal colors
+  static const tealColor = Color.fromARGB(255, 0, 128, 128);
   //window sizes
   static const maxWidth = 1920.0;
   static const maxHeight = 1080.0;
