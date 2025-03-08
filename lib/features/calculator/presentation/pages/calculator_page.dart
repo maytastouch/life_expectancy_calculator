@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/theme/bloc/theme_bloc.dart';
 import '../../../../core/theme/bloc/theme_state.dart';
-import '../../../../core/constants/colors.dart';
 import '../../../../core/constants/constants.dart'; // Import AppConstants
 import '../widgets/country_dropdown.dart';
 import '../widgets/birth_date_picker.dart';
@@ -143,7 +142,6 @@ class _CalculatorPageState extends State<CalculatorPage>
     return BlocBuilder<ThemeBloc, ThemeState>(
       builder: (context, themeState) {
         // Instead of comparing object reference, check the brightness directly
-        final isDarkMode = themeState.themeData.brightness == Brightness.dark;
         return Scaffold(
           backgroundColor: Theme.of(context).scaffoldBackgroundColor,
           appBar: AppBar(

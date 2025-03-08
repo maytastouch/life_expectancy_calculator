@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../../../core/constants/colors.dart';
 import '../../../../core/constants/constants.dart';
 import 'animated_counter.dart';
 import 'progress_bar.dart';
